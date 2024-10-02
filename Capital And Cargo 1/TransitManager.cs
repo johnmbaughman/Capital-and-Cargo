@@ -30,7 +30,7 @@ namespace Capital_and_Cargo
             EnsureTableExistsAndIsPopulated();
             this.dataManager = dataManager;
             this.player = player;
-            this.cities = cities;   
+            this.cities = cities;
             this.factories = factories;
         }
 
@@ -78,7 +78,7 @@ PurchasePrice REAL NOT NULL
             }
         }
 
-       
+
         public DataTable LoadTransit()
         {
             DataTable dataTable = new DataTable();
@@ -91,19 +91,19 @@ PurchasePrice REAL NOT NULL
                 {
                     dataTable.Load(reader);
                 }
-                
+
             }
             var col = dataTable.Columns.Add("Progress");
             col.SetOrdinal(0);
-            
+
             foreach (DataRow row in dataTable.Rows)
             {
 
                 //Convert the progress into a progress indicator
                 Double progress = (Double)row["progressPercentage"];
                 row["Progress"] = createProgressIndicatorString(progress, (String)row["TransportationMethod"]);
-                
-                    
+
+
             }
             dataTable.Columns.Remove("progressPercentage");
             dataTable.Columns.Remove("TransportationMethod");
@@ -163,7 +163,7 @@ PurchasePrice REAL NOT NULL
                 command.Parameters.AddWithValue("@city", city);
                 using (var reader = command.ExecuteReader())
                 {
-                  
+
                     dataTable.Load(reader);
                     lat = (Double)dataTable.Rows[0]["Latitude"];
                     lon = (Double)dataTable.Rows[0]["Longitude"];
@@ -214,7 +214,7 @@ PurchasePrice REAL NOT NULL
             }
             else
             {
-                price =  (distance * kmPriceTruck); 
+                price =  (distance * kmPriceTruck);
             }
             return (distance, price);
         }
@@ -228,7 +228,7 @@ PurchasePrice REAL NOT NULL
             }
             else
             {
-                
+
                 if (price < minPriceTruck) { price = minPriceTruck; }
             }
             return (distance, price);
@@ -258,7 +258,7 @@ PurchasePrice REAL NOT NULL
             Stopwatch stopwatch = Stopwatch.StartNew();
             /*using (var transaction = _connection.BeginTransaction())
             {
-              
+
                 try
                 {*/
                     var sql = @"
@@ -270,9 +270,9 @@ PurchasePrice REAL NOT NULL
                     //Debug.WriteLine("Updating transport progress");
                     using (var command = _connection.CreateCommand())
                     {
-                        
+
                         command.CommandText = sql;
-                        
+
                         command.Parameters.AddWithValue("@speed", speedTruck);
                         command.Parameters.AddWithValue("@TransportationMethod", "truck");
                        int affected =  command.ExecuteNonQuery();
@@ -283,7 +283,7 @@ PurchasePrice REAL NOT NULL
                     }
                     using (var command = _connection.CreateCommand())
                     {
-                       
+
                         command.CommandText = sql;
                         command.Parameters.AddWithValue("@speed", speedPlane);
                         command.Parameters.AddWithValue("@TransportationMethod", "plane");
@@ -293,11 +293,11 @@ PurchasePrice REAL NOT NULL
                             Debug.WriteLine("moving planes \t" + affected);
                         }
                     }
-                        
-                    
+
+
                     //If something arrives, add it to the warehouse
                     DataTable dataTable = new DataTable();
-                    
+
                     using (var command = _connection.CreateCommand())
                     {
                         command.CommandText = " select * from city_transit where progress >= 100";
@@ -314,7 +314,7 @@ PurchasePrice REAL NOT NULL
                     foreach (DataRow row in dataTable.Rows)
                     {
 
-                        
+
                         using (var command = _connection.CreateCommand())
                         {
                             //Debug.WriteLine("Adding to warehouse of " + row["DestinationCity"] + " \t" + row["CargoAmount"] + " " + row["CargoType"]);
@@ -340,7 +340,7 @@ PurchasePrice REAL NOT NULL
                             Debug.WriteLine("\t " + row["DestinationCity"] + "\t" + row["CargoAmount"] + "\t" + row["CargoAmount"]);
                             command.ExecuteNonQuery();
                             //Manage Reputation
-                            
+
                         }
                         using (var command = _connection.CreateCommand())
                         {
@@ -371,7 +371,7 @@ PurchasePrice REAL NOT NULL
                         //Auto Sell imported
                         DataRow factory = factories.getFactory((String)row["DestinationCity"], (String)row["CargoType"]);
                         if (factory!=null && (Int64)(factory["AutoSellImported"]) == 1)
-                        { 
+                        {
                                 DataTable prices = cities.GetPrices((String)row["DestinationCity"], (String)row["CargoType"]);
                                 Debug.WriteLine("AutoSell Import ->\t" + (Int64)row["CargoAmount"] + " " + (String)row["CargoType"] + " in " + (String)row["DestinationCity"] + " for " + (Double)prices.Rows[0]["BuyPrice"]);
                                 player.sell((String)row["DestinationCity"], (String)row["CargoType"], (Int64)row["CargoAmount"], (Double)prices.Rows[0]["BuyPrice"]);
@@ -418,7 +418,7 @@ PurchasePrice REAL NOT NULL
                     //Get current price from Warehouse
                     using (var command = _connection.CreateCommand())
                     {
-                        
+
                         command.CommandText = @"
                                select PurchasePrice / Amount as PurchaseUnitPrice from warehouse WHERE CargoType = @cargoType and CityName = @city
                         ";
@@ -460,7 +460,7 @@ PurchasePrice REAL NOT NULL
                     /*using (var command = _connection.CreateCommand())
                     {
 
-                        
+
                         Debug.WriteLine("Paying " + price);
                         command.CommandText = @"
                                UPDATE player SET money = money - @price 
@@ -469,9 +469,9 @@ PurchasePrice REAL NOT NULL
                         command.ExecuteNonQuery();
                     }*/
                     player.pay(price , originCity, CargoType + ".transport." + transportationMode);
-                    
-                   
-                        
+
+
+
                         using (var cmdInsert = _connection.CreateCommand())
                         {
                             cmdInsert.CommandText = @"
