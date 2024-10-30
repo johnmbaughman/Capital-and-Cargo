@@ -16,7 +16,7 @@ public class SoundManager : IDisposable
         Files = files;
         waveFileReaders = new Dictionary<string, WaveFileReader>();
     }
-
+    
     public void Initialize()
     {
         foreach (var file in Files)
